@@ -1,33 +1,42 @@
-const TelegramBot = require('node-telegram-bot-api');
-const express = require('express');
+# bot.py
+import os
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, CallbackContext
 
-// Конфигурация для Railway
-const port = process.env.PORT || 3000;
-const token = process.env.BOT_TOKEN;
-const webAppUrl = process.env.WEBAPP_URL;
+# Конфигурация из переменных окружения
+BOT_TOKEN = os.getenv('8039344227:AAFuRzP92ZoGOxRC3EOWF-OXVIyjfFnh9NA')
+WEBAPP_URL = os.getenv('https://anonymous-production.up.railway.app/')
 
-const bot = new TelegramBot(token, { polling: true });
-const app = express();
+def start(update: Update, context: CallbackContext) -> None:
+    # Форматированное сообщение с преимуществами
+    message = """
+🎯 *Быстрый поиск* – мгновенное соединение с собеседником
+🔒 *Полная анонимность* – ваши данные нигде не сохраняются
+💬 *Свободное общение* – обсуждайте любые темы без ограничений
+🔄 *Легкий переход* – смените собеседника в один клик
+    """
+    
+    # Кнопка для открытия WebApp
+    keyboard = [
+        [InlineKeyboardButton("Анонимный чат! 🚀", web_app={'url': WEBAPP_URL})]
+    ]
+    
+    update.message.reply_text(
+        text=message,
+        parse_mode='Markdown',
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
-// Веб-хук для Railway (необязательно, но для надежности)
-bot.setWebHook(`${webAppUrl}/bot${token}`);
+def main() -> None:
+    updater = Updater(BOT_TOKEN)
+    dispatcher = updater.dispatcher
+    
+    # Регистрация обработчика команды /start
+    dispatcher.add_handler(CommandHandler("start", start))
+    
+    # Запуск бота
+    updater.start_polling()
+    updater.idle()
 
-// Обработчик /start
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  const welcomeText = `...ваш текст приветствия...`;
-  
-  bot.sendMessage(chatId, welcomeText, {
-    parse_mode: 'Markdown',
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: '👨🏻‍💻 Анонимный чат', web_app: { url: webAppUrl } }]
-      ]
-    }
-  });
-});
-
-// Запускаем Express для Railway
-app.listen(port, () => {
-  console.log(`Bot and server running on port ${port}`);
-});
+if __name__ == '__main__':
+    main()
