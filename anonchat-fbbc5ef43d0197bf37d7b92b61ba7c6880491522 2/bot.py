@@ -1,11 +1,10 @@
 # bot.py
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackContext
-import os
 
-# Для локального тестирования (удалите эти строки при деплое на Railway!)
-BOT_TOKEN = "8039344227:AAFuRzP92ZoGOxRC3EOWF-OXVIyjfFnh9NA"  # Пример: "8039344227:AAFuRzP92ZoGOxRC3EOWF..."
-WEBAPP_URL = "https://anonymous-production.up.railway.app/"    # Пример: "https://ваш-проект.railway.app"
+# --- ВАШИ ДАННЫЕ (НЕБЕЗОПАСНЫЙ МЕТОД) ---
+BOT_TOKEN = "8039344227:AAFuRzP92ZoGOxRC3EOWF-OXVIyjfFnh9NA"
+WEBAPP_URL = "https://anonymous-production.up.railway.app/"
 
 def start(update: Update, context: CallbackContext) -> None:
     message = """
@@ -22,7 +21,7 @@ def start(update: Update, context: CallbackContext) -> None:
     )
 
 def main():
-    updater = Updater(BOT_TOKEN, use_context=True)
+    updater = Updater(BOT_TOKEN)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler("start", start))
     updater.start_polling()
