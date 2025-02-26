@@ -1,6 +1,3 @@
-// Для корректной работы с прокси Railway
-app.set('trust proxy', true);
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
