@@ -1,163 +1,533 @@
 /* Основные переменные */
 :root {
-    --header-height: 49px;
-    --input-area-height: 48px;
-    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --theme-bg: var(--tg-theme-bg-color, #fff);
-    --theme-text: var(--tg-theme-text-color, #000);
-    --theme-hint: var(--tg-theme-hint-color, #999);
-    --theme-link: var(--tg-theme-link-color, #2481cc);
-    --theme-button: var(--tg-theme-button-color, #2481cc);
-    --theme-button-text: var(--tg-theme-button-text-color, #fff);
-    --theme-secondary-bg: var(--tg-theme-secondary-bg-color, #f0f0f0);
+  --header-height: 49px;
+  --input-area-height: 48px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --theme-bg: var(--tg-theme-bg-color, #fff);
+  --theme-text: var(--tg-theme-text-color, #000);
+  --theme-hint: var(--tg-theme-hint-color, #999);
+  --theme-link: var(--tg-theme-link-color, #2481cc);
+  --theme-button: var(--tg-theme-button-color, #2481cc);
+  --theme-button-text: var(--tg-theme-button-text-color, #fff);
+  --theme-secondary-bg: var(--tg-theme-secondary-bg-color, #f0f0f0);
 }
 
 /* Базовые стили */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    height: 100vh;
-    height: -webkit-fill-available;
-    overflow: hidden;
-    background: var(--theme-bg);
-    color: var(--theme-text);
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  height: 100vh;
+  height: -webkit-fill-available;
+  width: 100%;
+  position: fixed; /* Важно для iOS */
+  overflow: hidden;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  padding-top: env(safe-area-inset-top);
 }
 
-/* Компоненты */
+/* Основной контейнер */
 .app-container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Профиль */
 .profile-form {
-    padding: 16px;
-    height: 100%;
-    overflow-y: auto;
+  padding: 16px;
+  padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom)));
+  height: 100%;
+  overflow-y: auto;
+  background: var(--theme-bg);
+}
+
+.profile-form h3 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--theme-text);
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.label {
+  font-size: 14px;
+  color: var(--theme-hint);
+  margin-bottom: 8px;
+  display: block;
+  font-weight: 500;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--theme-secondary-bg);
+  border-radius: 10px;
+  font-size: 16px;
+  background: var(--theme-secondary-bg);
+  color: var(--theme-text);
+  transition: all 0.2s ease;
+  -webkit-appearance: none; /* Важно для iOS */
+}
+
+.input-field:focus {
+  border-color: var(--theme-button);
+  background: var(--theme-bg);
+  outline: none;
+}
+
+/* Кнопки выбора пола */
+.gender-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.gender-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--theme-secondary-bg);
+  font-size: 16px;
+  background: var(--theme-secondary-bg);
+  color: var(--theme-text);
+  transition: all 0.2s ease;
+}
+
+.gender-btn[data-value="m"] {
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.2);
+  color: #007AFF;
+}
+
+.gender-btn[data-value="f"] {
+  background: rgba(255, 45, 85, 0.1);
+  border-color: rgba(255, 45, 85, 0.2);
+  color: #FF2D55;
+}
+
+.gender-btn[data-value="m"].active {
+  background: #007AFF;
+  border-color: #007AFF;
+  color: #fff;
+}
+
+.gender-btn[data-value="f"].active {
+  background: #FF2D55;
+  border-color: #FF2D55;
+  color: #fff;
+}
+
+/* Интересы */
+.interests-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.interest-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--theme-secondary-bg);
+  background: var(--theme-secondary-bg);
+  color: var(--theme-text);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.interest-btn.active {
+  background: var(--theme-button);
+  border-color: var(--theme-button);
+  color: var(--theme-button-text);
+}
+
+/* Основная кнопка */
+.primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--theme-button);
+  color: var(--theme-button-text);
+  font-size: 16px;
+  font-weight: 500;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  width: 100%;
+  transition: opacity 0.2s ease;
+}
+
+.primary-button:active {
+  opacity: 0.8;
 }
 
 /* Чат */
 .chat-container {
-    display: none;
-    flex-direction: column;
-    height: 100vh;
-    height: -webkit-fill-available;
-    position: relative;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: -webkit-fill-available;
+  position: relative;
+  overflow: hidden;
+}
+
+.partner-info {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--theme-secondary-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--theme-bg);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.skip-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--theme-button);
+  color: var(--theme-button-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .chat-area {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 16px;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 60px);
-    position: relative;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  padding-bottom: calc(var(--input-area-height) + var(--safe-area-bottom) + 16px);
+  position: relative;
 }
 
 /* Сообщения */
+.system-message {
+  text-align: center;
+  color: var(--theme-hint);
+  font-size: 14px;
+  margin: 8px 0;
+  padding: 4px 12px;
+  border-radius: 10px;
+  background: var(--theme-secondary-bg);
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .message {
-    max-width: 80%;
-    padding: 12px 16px;
-    margin: 4px 0;
-    border-radius: 18px;
-    font-size: 15px;
-    line-height: 1.4;
-    position: relative;
-    word-break: break-word;
+  max-width: 80%;
+  padding: 12px 16px;
+  margin: 4px 0;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.4;
+  position: relative;
+  word-break: break-word;
 }
 
 .message-own {
-    margin-left: auto;
-    border-bottom-right-radius: 4px;
-    background: var(--theme-button);
-    color: var(--theme-button-text);
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+  background: var(--theme-button);
+  color: var(--theme-button-text);
 }
 
 .message-partner {
-    margin-right: auto;
-    border-bottom-left-radius: 4px;
-    background: var(--theme-secondary-bg);
+  margin-right: auto;
+  border-bottom-left-radius: 4px;
+  background: var(--theme-secondary-bg);
+}
+
+.message-time {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* Индикатор печати */
+.typing-indicator {
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--theme-secondary-bg);
+  color: var(--theme-hint);
+  font-size: 13px;
+  margin-left: 16px;
+  margin-bottom: 8px;
+  display: none;
+}
+
+.typing-indicator.visible {
+  display: inline-flex;
+  align-items: center;
+}
+
+.typing-dots {
+  display: inline-flex;
+  margin-left: 4px;
+}
+
+.typing-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--theme-hint);
+  margin: 0 1px;
+  animation: typingAnimation 1.4s infinite;
+}
+
+@keyframes typingAnimation {
+  0%, 100% { opacity: 0.2; transform: translateY(0); }
+  50% { opacity: 0.8; transform: translateY(-2px); }
 }
 
 /* Поле ввода */
 .input-area {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 8px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
-    background: var(--theme-bg);
-    border-top: 1px solid var(--theme-secondary-bg);
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    z-index: 100;
-    transform: translateZ(0);
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px;
+  padding-bottom: max(8px, var(--safe-area-bottom));
+  background: var(--theme-bg);
+  border-top: 1px solid var(--theme-secondary-bg);
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 100;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+  will-change: transform;
 }
 
-.input-field {
-    flex: 1;
-    min-height: 36px;
-    max-height: 150px;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 18px;
-    background: var(--theme-secondary-bg);
-    font-size: 16px;
-    line-height: 20px;
-    color: var(--theme-text);
-    resize: none;
-    overflow-y: auto;
-    -webkit-appearance: none;
+.message-input {
+  flex: 1;
+  min-height: 36px;
+  max-height: 150px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 18px;
+  background: var(--theme-secondary-bg);
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--theme-text);
+  resize: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  -webkit-appearance: none; /* Важно для iOS */
 }
 
-.input-field:focus {
-    outline: none;
+.message-input:focus {
+  outline: none;
+}
+
+.message-input::placeholder {
+  color: var(--theme-hint);
+  opacity: 0.7;
 }
 
 .send-button {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: var(--theme-button);
-    color: var(--theme-button-text);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: opacity 0.15s ease;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--theme-button);
+  color: var(--theme-button-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
 }
 
-/* Утилиты */
-.hidden {
-    display: none !important;
+.send-button:active {
+  opacity: 0.7;
 }
 
-/* Медиа запросы */
-@media (max-width: 768px) {
-    .input-area {
-        position: sticky;
-    }
+/* Модальное окно */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 320px;
+  background: var(--theme-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: scaleIn 0.2s ease;
+}
+
+.modal-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--theme-secondary-bg);
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-body {
+  padding: 16px;
+}
+
+.modal-option {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: var(--theme-secondary-bg);
+  color: var(--theme-text);
+}
+
+.modal-option:last-child {
+  margin-bottom: 0;
+}
+
+.modal-option.selected {
+  background: var(--theme-button);
+  color: var(--theme-button-text);
+}
+
+.modal-footer {
+  display: flex;
+  border-top: 1px solid var(--theme-secondary-bg);
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.modal-btn.cancel {
+  color: var(--theme-text);
+  border-right: 1px solid var(--theme-secondary-bg);
+}
+
+.modal-btn.confirm {
+  color: #FF3B30;
+}
+
+.modal-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 /* Анимации */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-} 
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Адаптивные стили */
+@media (min-width: 769px) {
+  .input-area {
+    position: relative;
+    padding: 12px;
+    bottom: auto;
+  }
+  
+  .chat-area {
+    padding-bottom: 16px;
+  }
+}
+
+/* Утилиты */
+.hidden {
+  display: none !important;
+}
+
+.online-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4CAF50;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.unread-messages {
+  background: var(--theme-secondary-bg);
+  color: var(--theme-button);
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  margin: 8px auto;
+  text-align: center;
+  width: fit-content;
+}
+
+/* Стили для специфических iOS версий */
+@supports (-webkit-touch-callout: none) {
+  /* Фиксы для Safari iOS */
+  body {
+    position: fixed;
+    width: 100%;
+  }
+  
+  #inputArea {
+    position: fixed;
+    padding-bottom: max(6px, calc(6px + env(safe-area-inset-bottom)));
+  }
+  
+  #chat {
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Темная тема автоматически адаптируется благодаря переменным Telegram */
+@media (prefers-color-scheme: dark) {
+  /* Дополнительные стили для темной темы, если потребуется */
+  .system-message {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
