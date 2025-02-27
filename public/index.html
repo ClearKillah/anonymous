@@ -26,6 +26,9 @@
       overscroll-behavior: none;
       height: 100vh;
       height: -webkit-fill-available;
+      overflow-x: hidden;
+      position: fixed; /* Важно для iOS */
+      width: 100%; /* Важно для iOS */
       padding-top: env(safe-area-inset-top);
     }
 
@@ -45,6 +48,7 @@
       animation: fadeIn 0.3s ease;
       padding-top: 0;
       height: 100%;
+      overflow-y: auto;
     }
     
     #profileForm h3 {
@@ -90,6 +94,7 @@
       background: var(--tg-theme-secondary-bg-color, #f0f0f0);
       color: var(--tg-theme-text-color, #000);
       transition: all 0.2s ease;
+      -webkit-appearance: none; /* Важно для iOS */
     }
 
     #profileForm input:focus {
@@ -114,6 +119,7 @@
       background: var(--tg-theme-secondary-bg-color, #f0f0f0);
       color: var(--tg-theme-text-color, #000);
       transition: all 0.2s ease;
+      -webkit-touch-callout: none;
     }
     
     .gender-btn[data-value="m"] {
@@ -156,6 +162,7 @@
       color: var(--tg-theme-text-color, #000);
       font-size: 14px;
       transition: all 0.2s ease;
+      -webkit-touch-callout: none;
     }
     
     .interest-btn.active {
@@ -177,6 +184,8 @@
       padding: 14px;
       border-radius: 10px;
       border: none;
+      width: 100%;
+      -webkit-touch-callout: none;
     }
 
     /* Chat Container */
@@ -200,6 +209,8 @@
       background: var(--tg-theme-bg-color, #fff);
       -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
+      z-index: 10;
+      position: relative;
     }
     
     #skipBtn {
@@ -210,16 +221,18 @@
       color: var(--tg-theme-button-text-color, #fff);
       cursor: pointer;
       transition: all 0.2s ease;
+      font-weight: 500;
     }
 
     #skipBtn:active {
       transform: scale(0.95);
+      opacity: 0.8;
     }
 
     /* Chat Area */
     #chat {
       flex: 1;
-      height: calc(100vh - 60px); /* Высота минус поле ввода */
+      height: calc(100vh - 100px); /* Высота минус хедер и поле ввода */
       padding: 16px;
       padding-bottom: calc(60px + env(safe-area-inset-bottom));
       overflow-y: auto;
@@ -246,6 +259,12 @@
       color: var(--tg-theme-hint-color, #999);
       font-size: 14px;
       margin: 8px 0;
+      padding: 4px 12px;
+      border-radius: 10px;
+      background: var(--tg-theme-secondary-bg-color, rgba(0, 0, 0, 0.05));
+      display: inline-block;
+      margin-left: auto;
+      margin-right: auto;
     }
     
     .chat-msg {
@@ -298,13 +317,16 @@
       z-index: 1000;
       transform: translateZ(0);
       -webkit-transform: translateZ(0);
+      transition: transform 0.3s ease;
+      will-change: transform;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
     }
     
     #messageInput {
       flex: 1;
       min-height: 36px;
       max-height: 150px;
-      padding: 8px 12px;
+      padding: 9px 12px;
       border: none;
       border-radius: 18px;
       background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -314,6 +336,7 @@
       resize: none;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      -webkit-appearance: none; /* Важно для iOS */
     }
     
     #messageInput:focus {
@@ -339,6 +362,143 @@
 
     #sendBtn:active {
       opacity: 0.7;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: var(--tg-theme-secondary-bg-color, rgba(0, 0, 0, 0.05));
+      color: var(--tg-theme-hint-color, #999);
+      font-size: 13px;
+      margin-right: auto;
+      margin-bottom: 4px;
+      display: none;
+    }
+
+    .typing-indicator.visible {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .typing-dots {
+      display: inline-flex;
+      margin-left: 4px;
+    }
+
+    .typing-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--tg-theme-hint-color, #999);
+      margin: 0 1px;
+      animation: typingAnimation 1.4s infinite;
+      opacity: 0.6;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    /* Report button */
+    #reportBtn {
+      font-size: 13px;
+      color: var(--tg-theme-hint-color, #999);
+      background: none;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    /* Report modal */
+    #reportModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      width: 90%;
+      max-width: 320px;
+      background: var(--tg-theme-bg-color, #fff);
+      border-radius: 12px;
+      overflow: hidden;
+      animation: scaleIn 0.2s ease;
+    }
+
+    .modal-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+      text-align: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .modal-body {
+      padding: 16px;
+    }
+
+    .report-option {
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      color: var(--tg-theme-text-color, #000);
+    }
+
+    .report-option:last-child {
+      margin-bottom: 0;
+    }
+
+    .report-option.selected {
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #fff);
+    }
+
+    .modal-footer {
+      display: flex;
+      border-top: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      background: none;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .modal-btn.cancel {
+      color: var(--tg-theme-text-color, #000);
+      border-right: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+    }
+
+    .modal-btn.confirm {
+      color: #FF3B30;
+    }
+
+    .modal-btn.disabled {
+      opacity: 0.5;
+      pointer-events: none;
     }
 
     /* iOS specific styles */
@@ -395,6 +555,22 @@
       }
     }
 
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes typingAnimation {
+      0%, 100% { opacity: 0.2; transform: translateY(0); }
+      50% { opacity: 0.8; transform: translateY(-2px); }
+    }
+
     /* Удаляем ripple эффект */
     .ripple::after {
       display: none;
@@ -434,27 +610,6 @@
       margin: 8px auto;
       text-align: center;
       width: fit-content;
-    }
-
-    /* Добавляем стили для корректного отображения на полном экране */
-    body {
-      height: 100vh;
-      height: -webkit-fill-available;
-      padding-top: env(safe-area-inset-top);
-      background: var(--tg-theme-bg-color, #fff);
-    }
-
-    #mainWrapper {
-      height: 100%;
-      padding-top: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Обновляем стили для корректной работы с хедером Telegram */
-    #chatContainer, #profileForm {
-      padding-top: 0;
-      height: 100%;
     }
   </style>
 </head>
@@ -497,6 +652,9 @@
         <button class="interest-btn" data-value="Игры">Игры</button>
         <button class="interest-btn" data-value="Музыка">Музыка</button>
         <button class="interest-btn" data-value="Спорт">Спорт</button>
+        <button class="interest-btn" data-value="Кино">Кино</button>
+        <button class="interest-btn" data-value="Книги">Книги</button>
+        <button class="interest-btn" data-value="Путешествия">Путешествия</button>
       </div>
 
       <button id="saveProfileBtn">
@@ -512,18 +670,51 @@
     <div id="chatContainer">
       <div id="partnerInfo">
         <span id="partnerLabel">Поиск собеседника...</span>
-        <button id="skipBtn">Следующий</button>
+        <div class="partner-actions">
+          <button id="reportBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </button>
+          <button id="skipBtn">Следующий</button>
+        </div>
       </div>
       <div id="chat">
         <div class="system-message chat-msg">Ищем собеседника...</div>
       </div>
+      <div class="typing-indicator" id="typingIndicator">
+        Печатает<span class="typing-dots">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </span>
+      </div>
       <div id="inputArea">
         <textarea id="messageInput" placeholder="Сообщение" rows="1"></textarea>
         <button id="sendBtn">
-          <svg viewBox="0 0 24 24">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
           </svg>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div id="reportModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Пожаловаться</h3>
+      </div>
+      <div class="modal-body">
+        <div class="report-option" data-reason="spam">Спам</div>
+        <div class="report-option" data-reason="offensive">Оскорбления</div>
+        <div class="report-option" data-reason="adult">Неприемлемый контент</div>
+        <div class="report-option" data-reason="other">Другое</div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel">Отмена</button>
+        <button class="modal-btn confirm disabled">Отправить</button>
       </div>
     </div>
   </div>
@@ -550,12 +741,21 @@
     const chat = document.getElementById('chat');
     const partnerLabel = document.getElementById('partnerLabel');
     const skipBtn = document.getElementById('skipBtn');
+    const reportBtn = document.getElementById('reportBtn');
 
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    const reportModal = document.getElementById('reportModal');
+    const reportOptions = document.querySelectorAll('.report-option');
+    const reportCancelBtn = document.querySelector('.modal-btn.cancel');
+    const reportConfirmBtn = document.querySelector('.modal-btn.confirm');
 
     let partnerId = null;
     let selectedInterests = new Set();
+    let selectedReportReason = null;
+    let typingTimeout = null;
 
     // Gender selection
     genderButtons.forEach(btn => {
@@ -624,6 +824,22 @@
       tg.setHeaderColor(tg.colorScheme === 'dark' ? '#000000' : '#ffffff');
     });
 
+    // Обработка событий сокетов
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    socket.on('error', (error) => {
+      tg.showAlert(error.message || 'Произошла ошибка');
+    });
+
+    // Ожидание собеседника
+    socket.on('waitingForMatch', () => {
+      if (!document.querySelector('.system-message:last-child').textContent.includes('Поиск собеседника')) {
+        addSystemMessage('🔎 Поиск собеседника...');
+      }
+    });
+
     // Chat ready
     socket.on('chatReady', (data) => {
       partnerId = data.partnerId;
@@ -634,12 +850,26 @@
         ${genderEmoji} ${p.nickname}, ${p.age}
       `;
       addSystemMessage('✨ Собеседник найден');
+      
+      // Очищаем чат от предыдущих сообщений поиска
+      const messages = document.querySelectorAll('.chat-msg');
+      messages.forEach((msg, index) => {
+        if (index < messages.length - 1) {
+          msg.remove();
+        }
+      });
+      
       messageInput.focus();
+      clearTypingIndicator();
     });
 
     // Receive message
     socket.on('receiveMessage', (msg) => {
       addPartnerMessage(msg.text);
+      // Показываем, что есть непрочитанные сообщения, если пользователь не в чате
+      if (document.visibilityState === 'hidden') {
+        tg.HapticFeedback.notificationOccurred('warning');
+      }
     });
 
     // Partner left
@@ -648,17 +878,123 @@
       if (onlineIndicator) {
         onlineIndicator.style.background = '#999';
       }
-      addSystemMessage('Собеседник покинул чат');
-      partnerLabel.innerText = 'Поиск собеседника...';
+      addSystemMessage('❌ Собеседник покинул чат');
+      partnerLabel.innerHTML = `
+        <span class="online-indicator" style="background: #999;"></span>
+        Поиск собеседника...
+      `;
       partnerId = null;
+      clearTypingIndicator();
+    });
+
+    // Отключение из-за неактивности
+    socket.on('inactivityDisconnect', () => {
+      addSystemMessage('⏱️ Чат завершен из-за длительного отсутствия активности');
+      partnerLabel.innerHTML = `
+        <span class="online-indicator" style="background: #999;"></span>
+        Поиск собеседника...
+      `;
+      partnerId = null;
+      clearTypingIndicator();
+    });
+
+    // Индикатор набора текста
+    socket.on('partnerTyping', (isTyping) => {
+      if (isTyping) {
+        typingIndicator.classList.add('visible');
+      } else {
+        typingIndicator.classList.remove('visible');
+      }
+    });
+
+    // Успешная отправка жалобы
+    socket.on('reportSuccess', () => {
+      tg.showAlert('Жалоба отправлена. Спасибо за помощь!');
     });
 
     // Send message
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
+      }
+    });
+
+    // Typing indicator
+    messageInput.addEventListener('input', () => {
+      if (!partnerId) return;
+      
+      // Автоматическое изменение высоты textarea
+      messageInput.style.height = 'auto';
+      messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
+      
+      // Отправляем уведомление о наборе текста
+      socket.emit('typing', true);
+      
+      // Сбрасываем предыдущий таймер, если он есть
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+      
+      // Устанавливаем новый таймер
+      typingTimeout = setTimeout(() => {
+        socket.emit('typing', false);
+      }, 2000);
+    });
+
+    // Skip button
+    skipBtn.addEventListener('click', () => {
+      if (partnerId) {
+        tg.HapticFeedback.impactOccurred('medium');
+        socket.emit('skip');
+        addSystemMessage('🔄 Поиск нового собеседника...');
+      }
+    });
+
+    // Report button
+    reportBtn.addEventListener('click', () => {
+      if (!partnerId) return;
+      
+      // Открываем модальное окно для отчета
+      reportModal.style.display = 'flex';
+      selectedReportReason = null;
+      reportOptions.forEach(option => option.classList.remove('selected'));
+      reportConfirmBtn.classList.add('disabled');
+      
+      tg.HapticFeedback.impactOccurred('light');
+      tg.expand(); // Чтобы модальное окно растянулось на весь экран
+    });
+
+    // Report options
+    reportOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        reportOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedReportReason = option.dataset.reason;
+        reportConfirmBtn.classList.remove('disabled');
+        tg.HapticFeedback.impactOccurred('light');
+      });
+    });
+
+    // Report modal buttons
+    reportCancelBtn.addEventListener('click', () => {
+      reportModal.style.display = 'none';
+      tg.HapticFeedback.impactOccurred('light');
+    });
+
+    reportConfirmBtn.addEventListener('click', () => {
+      if (selectedReportReason && partnerId) {
+        socket.emit('reportUser', { reason: selectedReportReason });
+        reportModal.style.display = 'none';
+        tg.HapticFeedback.notificationOccurred('success');
+      }
+    });
+
+    // Close modal when clicking outside
+    reportModal.addEventListener('click', (e) => {
+      if (e.target === reportModal) {
+        reportModal.style.display = 'none';
       }
     });
 
@@ -669,6 +1005,16 @@
       socket.emit('sendMessage', text);
       addMyMessage(text);
       messageInput.value = '';
+      messageInput.style.height = '36px'; // Сбрасываем высоту
+      
+      // Сбрасываем индикатор набора
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+      socket.emit('typing', false);
+      
+      // Вибрация при отправке
+      tg.HapticFeedback.impactOccurred('light');
       
       if (window.innerWidth > 768) {
         messageInput.focus();
@@ -682,199 +1028,17 @@
       });
     }
 
-    // Mobile keyboard handling
-    messageInput.addEventListener('focus', () => {
-      if (window.innerWidth <= 768) {
-        setTimeout(() => {
-          chat.scrollTop = chat.scrollHeight;
-        }, 300);
-      }
-    });
-
-    // Window resize handling
-    window.addEventListener('resize', () => {
-      if (window.innerWidth <= 768) {
-        chat.scrollTop = chat.scrollHeight;
-      }
-    });
-
     // Message utilities
     function addMyMessage(text) {
       const div = document.createElement('div');
       div.className = 'my-message chat-msg';
-      div.innerText = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function addPartnerMessage(text) {
-      const div = document.createElement('div');
-      div.className = 'partner-message chat-msg';
-      div.innerText = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function addSystemMessage(text) {
-      const div = document.createElement('div');
-      div.className = 'system-message chat-msg';
-      div.innerHTML = `
-        <span class="system-message-text">${text}</span>
-      `;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    // Обработка клика по пустой области чата
-    chat.addEventListener('click', (e) => {
-      if (e.target === chat) {
-        messageInput.blur();
-      }
-    });
-
-    // Обновленная функция настройки мобильного ввода
-    function setupMobileInput() {
-      const inputArea = document.getElementById('inputArea');
-      const chat = document.getElementById('chat');
-      let keyboardVisible = false;
-
-      // Автоматическое изменение высоты textarea
-      function updateTextareaHeight() {
-        messageInput.style.height = 'auto';
-        messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
-      }
-
-      // Обработчик ввода текста
-      messageInput.addEventListener('input', updateTextareaHeight);
-
-      if (window.visualViewport) {
-        let lastVisualViewportHeight = window.visualViewport.height;
-
-        window.visualViewport.addEventListener('resize', () => {
-          const currentHeight = window.visualViewport.height;
-          const heightDiff = window.innerHeight - currentHeight;
-          
-          if (heightDiff > 150) { // Клавиатура открыта
-            keyboardVisible = true;
-            inputArea.style.position = 'absolute';
-            inputArea.style.bottom = `${heightDiff}px`;
-            
-            // Прокручиваем чат к последнему сообщению
-            requestAnimationFrame(() => {
-              chat.scrollTop = chat.scrollHeight;
-            });
-          } else {
-            keyboardVisible = false;
-            inputArea.style.position = 'fixed';
-            inputArea.style.bottom = '0';
-          }
-
-          lastVisualViewportHeight = currentHeight;
-        });
-
-        window.visualViewport.addEventListener('scroll', () => {
-          if (keyboardVisible) {
-            inputArea.style.bottom = `${window.visualViewport.offsetTop}px`;
-          }
-        });
-      }
-
-      // Обработка Enter для отправки (Shift+Enter для новой строки)
-      messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          if (messageInput.value.trim()) {
-            handleSend();
-          }
-        }
-      });
-
-      // Обработчик отправки
-      function handleSend() {
-        const text = messageInput.value.trim();
-        if (!text || !partnerId) return;
-        
-        socket.emit('sendMessage', text);
-        addMyMessage(text);
-        
-        messageInput.value = '';
-        messageInput.style.height = '36px'; // Сброс высоты
-        
-        // Сохраняем фокус после отправки
-        if (keyboardVisible) {
-          messageInput.focus();
-        }
-      }
-
-      // Обработка клика по чату
-      chat.addEventListener('click', (e) => {
-        if (e.target === chat) {
-          messageInput.blur();
-        }
-      });
-    }
-
-    // Инициализация
-    document.addEventListener('DOMContentLoaded', setupMobileInput);
-
-    // Обработка изменения размера окна
-    window.addEventListener('resize', () => {
-      if (window.innerWidth <= 768) {
-        chat.scrollTop = chat.scrollHeight;
-      }
-    });
-
-    // Добавляем обработку кнопки "назад"
-    tg.BackButton.show();
-    
-    // Обработка нажатия кнопки "назад"
-    tg.BackButton.onClick(() => {
-      if (chatContainer.style.display === 'flex') {
-        // Если мы в чате, возвращаемся к профилю
-        chatContainer.style.display = 'none';
-        profileForm.style.display = 'block';
-        
-        // Отключаемся от текущего чата
-        if (partnerId) {
-          socket.emit('leaveChat');
-          partnerId = null;
-        }
-        
-        // Очищаем чат
-        chat.innerHTML = '';
-        
-        // Сбрасываем поле ввода
-        messageInput.value = '';
-
-        // Скрываем кнопку "назад" на главном экране
-        tg.BackButton.hide();
-      } else {
-        // Если мы в профиле, спрашиваем о закрытии
-        if (confirm('Вы действительно хотите выйти?')) {
-          tg.close();
-        }
-      }
-    });
-
-    // Форматирование времени
-    function formatTime(date) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-    // Улучшенная функция добавления сообщения
-    function addMessage(text, isOwn) {
-      const div = document.createElement('div');
-      div.className = isOwn ? 'my-message chat-msg' : 'partner-message chat-msg';
       
       // Основной текст
       const messageText = document.createElement('div');
       messageText.className = 'message-text';
       
-      // Форматируем ссылки и эмодзи
-      const formattedText = text
-        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: inherit; text-decoration: underline;">$1</a>')
-        .replace(/\n/g, '<br>');
-        
+      // Форматируем ссылки
+      const formattedText = formatMessageText(text);
       messageText.innerHTML = formattedText;
       div.appendChild(messageText);
       
@@ -885,29 +1049,196 @@
       div.appendChild(timeDiv);
       
       chat.appendChild(div);
+      scrollChatToBottom();
+    }
+
+    function addPartnerMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'partner-message chat-msg';
       
-      // Автоматическая прокрутка только если мы близко к концу
-      if (chat.scrollHeight - chat.scrollTop - chat.clientHeight < 150) {
-        chat.scrollTop = chat.scrollHeight;
+      // Основной текст
+      const messageText = document.createElement('div');
+      messageText.className = 'message-text';
+      
+      // Форматируем ссылки
+      const formattedText = formatMessageText(text);
+      messageText.innerHTML = formattedText;
+      div.appendChild(messageText);
+      
+      // Добавляем время
+      const timeDiv = document.createElement('div');
+      timeDiv.className = 'message-time';
+      timeDiv.textContent = formatTime(new Date());
+      div.appendChild(timeDiv);
+      
+      chat.appendChild(div);
+      scrollChatToBottom();
+    }
+
+    function addSystemMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'system-message chat-msg';
+      div.innerHTML = text;
+      chat.appendChild(div);
+      scrollChatToBottom();
+    }
+
+    function formatMessageText(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: inherit; text-decoration: underline;">$1</a>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function formatTime(date) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function clearTypingIndicator() {
+      typingIndicator.classList.remove('visible');
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        typingTimeout = null;
       }
     }
 
-    // Обработка длинных сообщений
-    messageInput.addEventListener('input', function() {
-      this.style.height = 'auto';
-      const newHeight = Math.min(this.scrollHeight, 100);
-      this.style.height = newHeight + 'px';
+    function scrollChatToBottom() {
+      // Прокручиваем чат вниз с небольшой анимацией
+      setTimeout(() => {
+        chat.scrollTop = chat.scrollHeight;
+      }, 10);
+    }
+
+    // Улучшенная функция обработки мобильного ввода
+    function setupMobileInput() {
+      const inputArea = document.getElementById('inputArea');
+      const messageInput = document.getElementById('messageInput');
+      const chat = document.getElementById('chat');
+      let keyboardVisible = false;
       
-      // Обновляем отступ чата
-      chat.style.paddingBottom = (newHeight + 20) + 'px';
+      // Определяем, поддерживается ли visualViewport API
+      const hasVisualViewport = window.visualViewport !== undefined;
+      
+      // Функция для изменения высоты textarea
+      function updateTextareaHeight() {
+        messageInput.style.height = 'auto';
+        messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
+      }
+      
+      // Обработчик ввода для изменения высоты
+      messageInput.addEventListener('input', updateTextareaHeight);
+      
+      // Обработка visualViewport для iOS и новых Android устройств
+      if (hasVisualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+          const currentHeight = window.visualViewport.height;
+          const heightDiff = window.innerHeight - currentHeight;
+          
+          // Если высота изменилась значительно - считаем что клавиатура открылась
+          if (heightDiff > 150) { 
+            keyboardVisible = true;
+            
+            // Критически важно - меняем position на absolute при открытой клавиатуре
+            inputArea.style.position = 'absolute';
+            
+            // Прикрепляем поле ввода к верхней части клавиатуры
+            inputArea.style.bottom = `${heightDiff}px`;
+            
+            // Прокручиваем чат к последнему сообщению с небольшой задержкой
+            setTimeout(() => {
+              chat.scrollTop = chat.scrollHeight;
+            }, 100);
+          } else {
+            keyboardVisible = false;
+            inputArea.style.position = 'fixed';
+            inputArea.style.bottom = '0';
+          }
+        });
+        
+        // Этот обработчик важен для iOS, когда пользователь скроллит при открытой клавиатуре
+        window.visualViewport.addEventListener('scroll', () => {
+          if (keyboardVisible) {
+            inputArea.style.bottom = `${window.visualViewport.offsetTop}px`;
+          }
+        });
+      } else {
+        // Fallback для старых устройств - используем события фокуса
+        messageInput.addEventListener('focus', () => {
+          // Задержка для iOS, чтобы клавиатура успела появиться
+          setTimeout(() => {
+            window.scrollTo(0, 0);
+            document.body.scrollTop = 0;
+            
+            // Прокручиваем чат вниз
+            chat.scrollTop = chat.scrollHeight;
+          }, 300);
+        });
+      }
+      
+      // Обработчик клика по пустой части чата для скрытия клавиатуры
+      chat.addEventListener('click', (e) => {
+        if (e.target === chat) {
+          messageInput.blur();
+        }
+      });
+      
+      // При ресайзе окна - прокручиваем к последнему сообщению
+      window.addEventListener('resize', () => {
+        if (keyboardVisible) {
+          chat.scrollTop = chat.scrollHeight;
+        }
+      });
+    }
+
+    // Обработка кнопки "назад"
+    tg.BackButton.onClick(() => {
+      if (chatContainer.style.display === 'flex') {
+        // Сначала проверяем, открыто ли модальное окно
+        if (reportModal.style.display === 'flex') {
+          reportModal.style.display = 'none';
+          return;
+        }
+        
+        // Если мы в чате, спрашиваем о выходе
+        tg.showConfirm('Вы действительно хотите выйти из чата?', (confirmed) => {
+          if (confirmed) {
+            // Возвращаемся к профилю
+            chatContainer.style.display = 'none';
+            profileForm.style.display = 'block';
+            
+            // Отключаемся от текущего чата
+            if (partnerId) {
+              socket.emit('skip');
+              partnerId = null;
+            }
+            
+            // Очищаем чат
+            chat.innerHTML = '';
+            
+            // Сбрасываем поле ввода
+            messageInput.value = '';
+            messageInput.style.height = '36px';
+            
+            // Скрываем кнопку "назад" на главном экране
+            tg.BackButton.hide();
+          }
+        });
+      } else {
+        // Если мы в профиле, спрашиваем о закрытии
+        tg.showConfirm('Вы действительно хотите выйти?', (confirmed) => {
+          if (confirmed) {
+            tg.close();
+          }
+        });
+      }
     });
 
-    // Инициализация Telegram Mini App
+    // Инициализация
     document.addEventListener('DOMContentLoaded', () => {
-      // Сообщаем что приложение готово
+      // Инициализируем Telegram Mini App
       tg.ready();
-      
-      // Разворачиваем на весь экран
       tg.expand();
       
       // Устанавливаем цвет хедера в соответствии с темой
@@ -915,132 +1246,27 @@
       
       // Включаем подтверждение закрытия
       tg.enableClosingConfirmation();
-
-      // Настраиваем кнопку "назад"
-      tg.BackButton.onClick(() => {
-        if (chatContainer.style.display === 'flex') {
-          // Если мы в чате, возвращаемся к профилю
-          chatContainer.style.display = 'none';
-          profileForm.style.display = 'block';
-          
-          if (partnerId) {
-            socket.emit('leaveChat');
-            partnerId = null;
-          }
-          
-          chat.innerHTML = '';
-          messageInput.value = '';
-          
-          // Скрываем кнопку "назад" на главном экране
-          tg.BackButton.hide();
-        } else {
-          // Если мы в профиле, спрашиваем о закрытии
-          if (confirm('Вы действительно хотите выйти?')) {
-            tg.close();
-          }
-        }
-      });
-
-      // Обработка темной темы
-      const isDarkTheme = tg.colorScheme === 'dark';
-      if (isDarkTheme) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-
-      // Настраиваем хэппи-пас эффект (плавное появление)
-      tg.onEvent('viewportChanged', () => {
-        if (window.innerHeight === tg.viewportHeight) {
-          document.body.classList.add('app-ready');
-        }
-      });
-
-      // Инициализируем остальные функции
+      
+      // Настраиваем мобильный ввод
       setupMobileInput();
-    });
-
-    // Добавляем обработку системной темы
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      const isDark = e.matches;
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-      tg.setHeaderColor(isDark ? '#000000' : '#ffffff');
-    });
-
-    function setupInputArea() {
-      const inputArea = document.getElementById('inputArea');
-      const messageInput = document.getElementById('messageInput');
-      const chat = document.getElementById('chat');
       
-      // Функция для обновления высоты текстового поля
-      function updateTextareaHeight() {
-        messageInput.style.height = '36px';
-        messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
-      }
-
-      // Обработчик изменения размера viewport (для iOS)
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', () => {
-          const currentHeight = window.visualViewport.height;
-          const offset = window.innerHeight - currentHeight;
-          
-          if (offset > 0) {
-            // Клавиатура открыта
-            inputArea.style.position = 'absolute';
-            inputArea.style.bottom = offset + 'px';
-            
-            // Прокручиваем чат к последнему сообщению
-            setTimeout(() => {
-              chat.scrollTop = chat.scrollHeight;
-            }, 100);
-          } else {
-            // Клавиатура закрыта
-            inputArea.style.position = 'fixed';
-            inputArea.style.bottom = '0';
-          }
-        });
-
-        window.visualViewport.addEventListener('scroll', () => {
-          if (window.visualViewport.height < window.innerHeight) {
-            inputArea.style.bottom = window.visualViewport.offsetTop + 'px';
-          }
-        });
-      }
-
-      // Обработчики для текстового поля
-      messageInput.addEventListener('input', updateTextareaHeight);
+      // Скрываем кнопку "назад" при запуске
+      tg.BackButton.hide();
       
-      messageInput.addEventListener('focus', () => {
-        setTimeout(() => {
-          chat.scrollTop = chat.scrollHeight;
-        }, 100);
-      });
-
-      // Обработчик клика по чату для скрытия клавиатуры
-      chat.addEventListener('click', (e) => {
-        if (e.target === chat) {
-          messageInput.blur();
+      // Проверяем, если пользователь возвращается в приложение
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && partnerId) {
+          // Обновляем статус подключения
+          socket.emit('heartbeat');
         }
       });
-
-      // Обработка Enter для отправки
-      messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          if (messageInput.value.trim()) {
-            handleSend();
-          }
-        }
-      });
-    }
-
-    // Инициализация после загрузки страницы
-    document.addEventListener('DOMContentLoaded', () => {
-      setupInputArea();
-      
-      // Инициализация Telegram WebApp
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
     });
+
+    // Для iOS - особый хак для правильной высоты
+    document.documentElement.style.height = '100%';
+    document.body.style.height = '100%';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
   </script>
 </body>
 </html>
