@@ -1216,14 +1216,64 @@ const messageInput = document.getElementById('messageInput');
         chat.scrollTop = chat.scrollHeight;
       }, 10);
     }
-
-    // Улучшенная функция обработки мобильного ввода
     function setupMobileInput() {
-      const inputArea = document.getElementById('inputArea');
-      const messageInput = document.getElementById('messageInput');
-      const chat = document.getElementById('chat');
-      let keyboardVisible = false;
-      let keyboardHeight = 0;
+  const inputArea = document.getElementById('inputArea');
+  const messageInput = document.getElementById('messageInput');
+  const chat = document.getElementById('chat');
+  
+  // Сначала установим позицию жестко
+  inputArea.style.position = 'fixed';
+  inputArea.style.left = '0';
+  inputArea.style.right = '0';
+  inputArea.style.bottom = '0';
+  inputArea.style.zIndex = '9999';
+  
+  // iOS-специфичные стили
+  document.documentElement.style.height = '-webkit-fill-available';
+  document.body.style.height = '-webkit-fill-available';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+  
+  // Создаем контейнер для сообщений с отступом снизу
+  chat.style.paddingBottom = '60px';
+  
+  // Обработка фокуса
+  messageInput.addEventListener('focus', () => {
+    // Фиксируем клавиатуру
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      
+      // Программно прокручиваем к последнему сообщению
+      chat.scrollTop = chat.scrollHeight;
+      
+      // Устанавливаем поле ввода как абсолютно позиционированное
+      // для предотвращения скроллинга страницы
+      inputArea.style.position = 'absolute';
+      document.body.style.overflow = 'hidden';
+      
+      // Этот хак перемещает поле ввода в область видимости
+      setTimeout(() => {
+        messageInput.scrollIntoView(false);
+      }, 300);
+    }, 100);
+  });
+  
+  // При потере фокуса возвращаем в нормальное положение
+  messageInput.addEventListener('blur', () => {
+    inputArea.style.position = 'fixed';
+    inputArea.style.bottom = '0';
+    document.body.style.overflow = '';
+  });
+  
+  // ВАЖНО: обработка размера текстового поля
+  messageInput.addEventListener('input', () => {
+    messageInput.style.height = 'auto';
+    messageInput.style.height = (messageInput.scrollHeight > 150 ? 150 : messageInput.scrollHeight) + 'px';
+    
+    // Обновляем скролл после изменения размера
+    chat.scrollTop = chat.scrollHeight;
+  });
+}
     
       // Функция для изменения высоты textarea
       function updateTextareaHeight() {
