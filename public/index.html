@@ -15,75 +15,6 @@
   <link rel="stylesheet" href="styles.css">
   
   <style>
-    /* Добавьте эти стили в секцию <style> в index.html или в styles.css */
-
-/* Стили для полноэкранного режима */
-html, body {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  height: -webkit-fill-available;
-  overflow: hidden;
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: none;
-}
-
-#mainWrapper {
-  width: 100%;
-  height: 100%;
-  height: -webkit-fill-available;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-}
-
-/* Для видимости контента */
-#profileForm, #chatContainer {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-#chat {
-  padding-bottom: calc(60px + env(safe-area-inset-bottom));
-}
-
-#inputArea {
-  padding-bottom: calc(6px + env(safe-area-inset-bottom));
-}
-
-/* Класс, добавляемый после завершения инициализации */
-.app-ready {
-  transition: opacity 0.3s ease;
-  opacity: 1;
-}
-
-/* Изначально скрываем, чтобы не было мерцания при загрузке */
-body:not(.app-ready) {
-  opacity: 0.98;
-}
-
-/* Фикс для iOS Safari */
-@supports (-webkit-touch-callout: none) {
-  .chat-area {
-    height: -webkit-fill-available;
-  }
-  
-  #inputArea {
-    /* Важный фикс для iOS клавиатуры */
-    transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
-    will-change: transform;
-  }
-}
-    
     * {
       box-sizing: border-box;
       margin: 0;
@@ -103,8 +34,8 @@ body:not(.app-ready) {
       height: 100vh;
       height: -webkit-fill-available;
       overflow-x: hidden;
-      position: fixed; /* Важно для iOS */
-      width: 100%; /* Важно для iOS */
+      position: fixed;
+      width: 100%;
       padding-top: env(safe-area-inset-top);
     }
 
@@ -170,7 +101,7 @@ body:not(.app-ready) {
       background: var(--tg-theme-secondary-bg-color, #f0f0f0);
       color: var(--tg-theme-text-color, #000);
       transition: all 0.2s ease;
-      -webkit-appearance: none; /* Важно для iOS */
+      -webkit-appearance: none;
     }
 
     #profileForm input:focus {
@@ -308,7 +239,7 @@ body:not(.app-ready) {
     /* Chat Area */
     #chat {
       flex: 1;
-      height: calc(100vh - 100px); /* Высота минус хедер и поле ввода */
+      height: calc(100vh - 100px);
       padding: 16px;
       padding-bottom: calc(60px + env(safe-area-inset-bottom));
       overflow-y: auto;
@@ -393,8 +324,8 @@ body:not(.app-ready) {
       z-index: 1000;
       transform: translateZ(0);
       -webkit-transform: translateZ(0);
-      transition: transform 0.3s ease;
-      will-change: transform;
+      will-change: transform, position, bottom;
+      transition: bottom 0.1s ease-out;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
     }
     
@@ -402,7 +333,7 @@ body:not(.app-ready) {
       flex: 1;
       min-height: 36px;
       max-height: 150px;
-      padding: 9px 12px;
+      padding: 9px 14px;
       border: none;
       border-radius: 18px;
       background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -412,11 +343,18 @@ body:not(.app-ready) {
       resize: none;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      -webkit-appearance: none; /* Важно для iOS */
+      outline: none;
+      -webkit-appearance: none;
+      will-change: height;
     }
     
     #messageInput:focus {
       outline: none;
+    }
+    
+    #messageInput::placeholder {
+      color: var(--tg-theme-hint-color, #999);
+      opacity: 0.7;
     }
 
     /* Кнопка отправки в стиле Telegram */
@@ -576,6 +514,74 @@ body:not(.app-ready) {
       opacity: 0.5;
       pointer-events: none;
     }
+    
+    /* Стили для состояния с открытой клавиатурой */
+    body.keyboard-open #chat {
+      padding-bottom: 100px;
+    }
+    
+    /* Стили для iOS устройств */
+    @supports (-webkit-touch-callout: none) {
+      #inputArea {
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+      }
+      
+      body.keyboard-open {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+      }
+    }
+    
+    /* Для устройств Android */
+    @supports not (-webkit-touch-callout: none) {
+      body.keyboard-open #inputArea {
+        position: absolute;
+      }
+    }
+    
+    /* Специальные стили для iOS клавиатуры */
+    body.ios-keyboard-open {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    body.ios-keyboard-open #mainWrapper {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    body.ios-keyboard-open #chat {
+      padding-bottom: 100px !important;
+    }
+    
+    body.ios-keyboard-open #inputArea {
+      position: absolute;
+      bottom: auto;
+    }
+    
+    /* Фикс для iOS виртуальной клавиатуры */
+    @media (max-height: 400px) and (-webkit-min-device-pixel-ratio: 2) {
+      #inputArea {
+        position: absolute !important;
+        bottom: 0 !important;
+      }
+      
+      #chat {
+        padding-bottom: 60px !important;
+      }
+    }
+    
+    /* Дополнительный фикс для iPhone X и новее с "челкой" */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      #inputArea {
+        padding-bottom: calc(6px + env(safe-area-inset-bottom));
+      }
+    }
 
     /* iOS specific styles */
     @supports (-webkit-touch-callout: none) {
@@ -669,23 +675,16 @@ body:not(.app-ready) {
       display: inline-block;
       margin-right: 6px;
     }
-
-    /* Улучшенные стили для placeholder */
-    #messageInput::placeholder {
-      color: var(--tg-theme-hint-color, #999);
-      opacity: 0.7;
+    
+    /* Класс, добавляемый после завершения инициализации */
+    .app-ready {
+      transition: opacity 0.3s ease;
+      opacity: 1;
     }
-
-    /* Стили для непрочитанных сообщений */
-    .unread-messages {
-      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-      color: var(--tg-theme-button-color, #2481cc);
-      font-size: 13px;
-      padding: 4px 12px;
-      border-radius: 12px;
-      margin: 8px auto;
-      text-align: center;
-      width: fit-content;
+    
+    /* Изначально скрываем, чтобы не было мерцания при загрузке */
+    body:not(.app-ready) {
+      opacity: 0.98;
     }
   </style>
 </head>
@@ -798,80 +797,44 @@ body:not(.app-ready) {
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const tg = window.Telegram.WebApp;
-    // Добавьте эти изменения в начало скрипта в index.html, после объявления переменной tg
-// Сразу после строки const tg = window.Telegram.WebApp;
-
-// Проверяем, поддерживает ли WebApp полноэкранный режим
-const supportsFullscreen = typeof tg.setHeaderColor === 'function' && 
-                            typeof tg.setBackgroundColor === 'function' &&
-                            typeof tg.enableClosingConfirmation === 'function';
-
-// Функция для инициализации полноэкранного режима
-function initFullscreenMode() {
-  // Максимально расширяем WebApp
-  tg.expand();
-  
-  // Устанавливаем полноэкранный режим, если доступен
-  if (supportsFullscreen) {
-    // Опциональное скрытие основного заголовка Telegram (если API будет поддерживать)
-    if (typeof tg.enableHeaderControl === 'function') {
-      tg.enableHeaderControl();
+    
+    const supportsFullscreen = typeof tg.setHeaderColor === 'function' && 
+                              typeof tg.setBackgroundColor === 'function' &&
+                              typeof tg.enableClosingConfirmation === 'function';
+    
+    function initFullscreenMode() {
+      tg.expand();
+      
+      if (supportsFullscreen) {
+        if (typeof tg.enableHeaderControl === 'function') {
+          tg.enableHeaderControl();
+        }
+        
+        tg.setHeaderColor(tg.colorScheme === 'dark' ? '#000000' : '#ffffff');
+        tg.setBackgroundColor(tg.colorScheme === 'dark' ? '#000000' : '#ffffff');
+        
+        if (typeof tg.requestViewport === 'function') {
+          tg.requestViewport({
+            height: '100%',
+            is_expanded: true
+          });
+        }
+        
+        document.documentElement.style.position = 'fixed';
+        document.documentElement.style.width = '100%';
+        document.documentElement.style.height = '100%';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+      }
     }
     
-    // Установка цвета шапки в соответствии с текущей темой
-    tg.setHeaderColor(tg.colorScheme === 'dark' ? '#000000' : '#ffffff');
-    
-    // Установка цвета фона в соответствии с темой
-    tg.setBackgroundColor(tg.colorScheme === 'dark' ? '#000000' : '#ffffff');
-    
-    // Запрос максимально возможной высоты для WebApp
-    if (typeof tg.requestViewport === 'function') {
-      tg.requestViewport({
-        height: '100%',
-        is_expanded: true
-      });
-    }
-    
-    // Убираем скролл для iOS Safari
-    document.documentElement.style.position = 'fixed';
-    document.documentElement.style.width = '100%';
-    document.documentElement.style.height = '100%';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.height = '100%';
-    
-    console.log('Fullscreen mode initialized');
-  }
-}
+    tg.onEvent('viewportChanged', () => {
+      if (window.innerHeight === tg.viewportHeight) {
+        document.body.classList.add('app-ready');
+      }
+    });
 
-// Вызываем функцию после готовности WebApp
-tg.onEvent('viewportChanged', () => {
-  // Проверяем, изменилась ли высота viewport
-  if (window.innerHeight === tg.viewportHeight) {
-    document.body.classList.add('app-ready');
-  }
-});
-
-// Также необходимо заменить существующую инициализацию в DOMContentLoaded на:
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Инициализируем Telegram Mini App
-  tg.ready();
-  
-  // Активируем полноэкранный режим
-  initFullscreenMode();
-  
-  // Включаем подтверждение закрытия
-  tg.enableClosingConfirmation();
-  
-  // Настраиваем мобильный ввод
-  setupMobileInput();
-  
-  // Скрываем кнопку "назад" при запуске
-  tg.BackButton.hide();
-  
-  // Дополнительные обработчики...
-});
     tg.expand();
     tg.ready();
 
@@ -893,7 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const skipBtn = document.getElementById('skipBtn');
     const reportBtn = document.getElementById('reportBtn');
 
-    const messageInput = document.getElementById('messageInput');
+const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
     const typingIndicator = document.getElementById('typingIndicator');
 
@@ -1171,13 +1134,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Desktop auto-focus
-    if (window.innerWidth > 768) {
-      chat.addEventListener('click', () => {
-        messageInput.focus();
-      });
-    }
-
     // Message utilities
     function addMyMessage(text) {
       const div = document.createElement('div');
@@ -1267,10 +1223,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const messageInput = document.getElementById('messageInput');
       const chat = document.getElementById('chat');
       let keyboardVisible = false;
-      
-      // Определяем, поддерживается ли visualViewport API
-      const hasVisualViewport = window.visualViewport !== undefined;
-      
+      let keyboardHeight = 0;
+    
       // Функция для изменения высоты textarea
       function updateTextareaHeight() {
         messageInput.style.height = 'auto';
@@ -1280,65 +1234,151 @@ document.addEventListener('DOMContentLoaded', () => {
       // Обработчик ввода для изменения высоты
       messageInput.addEventListener('input', updateTextareaHeight);
       
-      // Обработка visualViewport для iOS и новых Android устройств
-      if (hasVisualViewport) {
+      // Используем visualViewport API для определения высоты клавиатуры
+      if (window.visualViewport) {
+        // Сохраняем исходную высоту окна просмотра
+        const originalHeight = window.visualViewport.height;
+        
         window.visualViewport.addEventListener('resize', () => {
+          // Получаем текущую высоту
           const currentHeight = window.visualViewport.height;
-          const heightDiff = window.innerHeight - currentHeight;
           
-          // Если высота изменилась значительно - считаем что клавиатура открылась
-          if (heightDiff > 150) { 
+          // Если высота уменьшилась значительно, это означает, что клавиатура открылась
+          if (currentHeight < originalHeight * 0.75) {
             keyboardVisible = true;
+            keyboardHeight = window.innerHeight - currentHeight;
             
-            // Критически важно - меняем position на absolute при открытой клавиатуре
+            // Переключаем позиционирование на абсолютное
             inputArea.style.position = 'absolute';
+            inputArea.style.bottom = `${keyboardHeight}px`;
             
-            // Прикрепляем поле ввода к верхней части клавиатуры
-            inputArea.style.bottom = `${heightDiff}px`;
+            // Добавляем класс для обозначения открытой клавиатуры
+            document.body.classList.add('keyboard-open');
             
-            // Прокручиваем чат к последнему сообщению с небольшой задержкой
+            // Прокручиваем чат, чтобы было видно последнее сообщение
             setTimeout(() => {
               chat.scrollTop = chat.scrollHeight;
             }, 100);
           } else {
             keyboardVisible = false;
+            keyboardHeight = 0;
+            
+            // Возвращаем позиционирование к фиксированному
             inputArea.style.position = 'fixed';
             inputArea.style.bottom = '0';
+            
+            // Удаляем класс
+            document.body.classList.remove('keyboard-open');
           }
         });
         
-        // Этот обработчик важен для iOS, когда пользователь скроллит при открытой клавиатуре
+        // Важно отслеживать и прокрутку viewport при открытой клавиатуре
         window.visualViewport.addEventListener('scroll', () => {
           if (keyboardVisible) {
-            inputArea.style.bottom = `${window.visualViewport.offsetTop}px`;
+            // Обновляем положение поля ввода относительно верха клавиатуры
+            inputArea.style.bottom = `${keyboardHeight - window.visualViewport.offsetTop}px`;
           }
         });
       } else {
-        // Fallback для старых устройств - используем события фокуса
-        messageInput.addEventListener('focus', () => {
-          // Задержка для iOS, чтобы клавиатура успела появиться
-          setTimeout(() => {
-            window.scrollTo(0, 0);
-            document.body.scrollTop = 0;
+        // Fallback для старых устройств - используем события фокуса и размера окна
+        let lastHeight = window.innerHeight;
+        
+        function checkKeyboard() {
+          const currentHeight = window.innerHeight;
+          
+          if (currentHeight < lastHeight * 0.75) {
+            // Клавиатура открылась
+            keyboardVisible = true;
             
-            // Прокручиваем чат вниз
-            chat.scrollTop = chat.scrollHeight;
-          }, 300);
+            // Прокручиваем чат к последнему сообщению
+            setTimeout(() => {
+              chat.scrollTop = chat.scrollHeight;
+              
+              // На устройствах без visualViewport можно только приблизительно позиционировать
+              // поле ввода над клавиатурой
+              inputArea.style.position = 'fixed';
+              inputArea.style.bottom = '0';
+            }, 300);
+          } else {
+            // Клавиатура закрылась
+            keyboardVisible = false;
+            inputArea.style.position = 'fixed';
+            inputArea.style.bottom = '0';
+          }
+          
+          lastHeight = currentHeight;
+        }
+        
+        // Отслеживаем изменение размера окна
+        window.addEventListener('resize', checkKeyboard);
+        
+        // Отслеживаем фокус поля ввода
+        messageInput.addEventListener('focus', () => {
+          setTimeout(checkKeyboard, 500);
         });
       }
       
-      // Обработчик клика по пустой части чата для скрытия клавиатуры
+      // Скрываем клавиатуру при клике на пустую область чата
       chat.addEventListener('click', (e) => {
         if (e.target === chat) {
           messageInput.blur();
         }
       });
+    }
+    
+    // Специальный фикс для iOS клавиатуры
+    function setupIOSKeyboardFix() {
+      // Проверяем, является ли устройство iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       
-      // При ресайзе окна - прокручиваем к последнему сообщению
-      window.addEventListener('resize', () => {
-        if (keyboardVisible) {
+      if (!isIOS) return; // Если не iOS, выходим из функции
+      
+      const inputArea = document.getElementById('inputArea');
+      const messageInput = document.getElementById('messageInput');
+      
+      // Предварительно устанавливаем некоторые стили специфичные для iOS
+      document.documentElement.style.height = '100%';
+      document.body.style.height = '100%';
+      
+      // На iOS при фокусе часто появляется проблема с прокруткой
+      messageInput.addEventListener('focus', () => {
+        // Небольшая задержка, чтобы клавиатура успела появиться
+        setTimeout(() => {
+          // iOS Safari может скроллить всю страницу, предотвращаем это
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+          
+          // Прокручиваем чат к последнему сообщению
+          const chat = document.getElementById('chat');
           chat.scrollTop = chat.scrollHeight;
-        }
+          
+          // Добавляем класс для специальных iOS-стилей
+          document.body.classList.add('ios-keyboard-open');
+        }, 300);
+      });
+      
+      messageInput.addEventListener('blur', () => {
+        // Убираем класс при потере фокуса
+        document.body.classList.remove('ios-keyboard-open');
+        
+        // Возвращаем стандартную позицию поля ввода
+        inputArea.style.position = 'fixed';
+        inputArea.style.bottom = '0';
+      });
+      
+      // Дополнительная обработка для старых версий iOS
+      window.addEventListener('orientationchange', () => {
+        // Переориентация может вызвать проблемы с клавиатурой
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          
+          if (document.activeElement === messageInput) {
+            // Восстанавливаем фокус после изменения ориентации
+            messageInput.blur();
+            setTimeout(() => messageInput.focus(), 100);
+          }
+        }, 200);
       });
     }
 
@@ -1389,16 +1429,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('DOMContentLoaded', () => {
       // Инициализируем Telegram Mini App
       tg.ready();
-      tg.expand();
       
-      // Устанавливаем цвет хедера в соответствии с темой
-      tg.setHeaderColor(tg.colorScheme === 'dark' ? '#000000' : '#ffffff');
+      // Активируем полноэкранный режим
+      initFullscreenMode();
       
       // Включаем подтверждение закрытия
       tg.enableClosingConfirmation();
       
       // Настраиваем мобильный ввод
       setupMobileInput();
+      
+      // Добавляем специальный фикс для iOS
+      setupIOSKeyboardFix();
       
       // Скрываем кнопку "назад" при запуске
       tg.BackButton.hide();
@@ -1411,12 +1453,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
-
-    // Для iOS - особый хак для правильной высоты
-    document.documentElement.style.height = '100%';
-    document.body.style.height = '100%';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
   </script>
 </body>
 </html>
