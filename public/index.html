@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anon Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--tg-theme-bg-color, #fff);
+      color: var(--tg-theme-text-color, #000);
+      -webkit-user-select: none;
+      user-select: none;
+      overscroll-behavior: none;
+      height: 100vh;
+      height: -webkit-fill-available;
+      padding-top: env(safe-area-inset-top);
+    }
+
+    #mainWrapper {
+      width: 100%;
+      height: 100%;
+      height: -webkit-fill-available;
+      display: flex;
+      flex-direction: column;
+      padding-top: 0;
+    }
+
+    /* Profile Form */
+    #profileForm {
+      padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+      background: var(--tg-theme-bg-color, #fff);
+      animation: fadeIn 0.3s ease;
+      padding-top: 0;
+      height: 100%;
+    }
+    
+    #profileForm h3 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--tg-theme-text-color, #000);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #profileForm h3::before {
+      content: "💭";
+      font-size: 24px;
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+      animation: slideUp 0.3s ease;
+      animation-fill-mode: both;
+    }
+    
+    .input-group:nth-child(2) { animation-delay: 0.1s; }
+    .input-group:nth-child(3) { animation-delay: 0.2s; }
+    .input-group:nth-child(4) { animation-delay: 0.3s; }
+    
+    .label {
+      font-size: 14px;
+      color: var(--tg-theme-hint-color, #999);
+      margin-bottom: 8px;
+      display: block;
+      font-weight: 500;
+    }
+    
+    #profileForm input {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 4px;
+      border: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 10px;
+      font-size: 16px;
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      color: var(--tg-theme-text-color, #000);
+      transition: all 0.2s ease;
+    }
+
+    #profileForm input:focus {
+      border-color: var(--tg-theme-button-color, #2481cc);
+      background: var(--tg-theme-bg-color, #fff);
+      outline: none;
+    }
+
+    /* Gender Buttons */
+    #genderButtons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .gender-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+      font-size: 16px;
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      color: var(--tg-theme-text-color, #000);
+      transition: all 0.2s ease;
+    }
+    
+    .gender-btn[data-value="m"] {
+      background: rgba(0, 122, 255, 0.1);
+      border-color: rgba(0, 122, 255, 0.2);
+      color: #007AFF;
+    }
+    
+    .gender-btn[data-value="f"] {
+      background: rgba(255, 45, 85, 0.1);
+      border-color: rgba(255, 45, 85, 0.2);
+      color: #FF2D55;
+    }
+    
+    .gender-btn[data-value="m"].active {
+      background: #007AFF;
+      border-color: #007AFF;
+      color: #fff;
+    }
+    
+    .gender-btn[data-value="f"].active {
+      background: #FF2D55;
+      border-color: #FF2D55;
+      color: #fff;
+    }
+
+    /* Interests */
+    #interestsContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .interest-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      color: var(--tg-theme-text-color, #000);
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    
+    .interest-btn.active {
+      background: var(--tg-theme-button-color, #2481cc);
+      border-color: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #fff);
+    }
+
+    /* Main button */
+    #saveProfileBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #fff);
+      font-size: 16px;
+      font-weight: 500;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    /* Chat Container */
+    #chatContainer {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      padding-top: 0;
+      height: 100%;
+    }
+    
+    #partnerInfo {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--tg-theme-bg-color, #fff);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+    
+    #skipBtn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #fff);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    #skipBtn:active {
+      transform: scale(0.95);
+    }
+
+    /* Chat Area */
+    #chat {
+      flex: 1;
+      height: calc(100vh - 60px); /* Высота минус поле ввода */
+      padding: 16px;
+      padding-bottom: calc(60px + env(safe-area-inset-bottom));
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+      background: var(--tg-theme-bg-color, #fff);
+    }
+    
+    #chat::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #chat::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #chat::-webkit-scrollbar-thumb {
+      background: var(--tg-theme-hint-color, rgba(0, 0, 0, 0.2));
+      border-radius: 2px;
+    }
+    
+    .system-message {
+      text-align: center;
+      color: var(--tg-theme-hint-color, #999);
+      font-size: 14px;
+      margin: 8px 0;
+    }
+    
+    .chat-msg {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: slideUpFade 0.3s ease forwards;
+    }
+    
+    .my-message,
+    .partner-message {
+      max-width: 80%;
+      padding: 12px 16px;
+      margin: 4px 0;
+      border-radius: 18px;
+      font-size: 15px;
+      line-height: 1.4;
+      position: relative;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    
+    .my-message {
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #fff);
+    }
+    
+    .partner-message {
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      color: var(--tg-theme-text-color, #000);
+    }
+
+    /* Input Area */
+    #inputArea {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      min-height: 48px;
+      background: var(--tg-theme-bg-color, #fff);
+      border-top: 1px solid var(--tg-theme-secondary-bg-color, rgba(0, 0, 0, 0.1));
+      padding: 6px 8px;
+      padding-bottom: calc(6px + env(safe-area-inset-bottom));
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      z-index: 1000;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+    
+    #messageInput {
+      flex: 1;
+      min-height: 36px;
+      max-height: 150px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 18px;
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      font-size: 16px;
+      line-height: 20px;
+      color: var(--tg-theme-text-color, #000);
+      resize: none;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    #messageInput:focus {
+      outline: none;
+    }
+
+    /* Кнопка отправки в стиле Telegram */
+    #sendBtn {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #fff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-bottom: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    #sendBtn:active {
+      opacity: 0.7;
+    }
+
+    /* iOS specific styles */
+    @supports (-webkit-touch-callout: none) {
+      #inputArea {
+        position: fixed;
+      }
+    }
+
+    /* Desktop styles */
+    @media (min-width: 769px) {
+      #chatContainer {
+        padding-bottom: 0;
+      }
+
+      #chat {
+        position: relative;
+        top: 0;
+        padding-bottom: 16px;
+      }
+      
+      #inputArea {
+        position: relative;
+        padding: 12px;
+        bottom: 0;
+      }
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUpFade {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Удаляем ripple эффект */
+    .ripple::after {
+      display: none;
+    }
+
+    /* Стили для времени сообщения */
+    .message-time {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    /* Индикатор онлайна */
+    .online-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4CAF50;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    /* Улучшенные стили для placeholder */
+    #messageInput::placeholder {
+      color: var(--tg-theme-hint-color, #999);
+      opacity: 0.7;
+    }
+
+    /* Стили для непрочитанных сообщений */
+    .unread-messages {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      color: var(--tg-theme-button-color, #2481cc);
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin: 8px auto;
+      text-align: center;
+      width: fit-content;
+    }
+
+    /* Добавляем стили для корректного отображения на полном экране */
+    body {
+      height: 100vh;
+      height: -webkit-fill-available;
+      padding-top: env(safe-area-inset-top);
+      background: var(--tg-theme-bg-color, #fff);
+    }
+
+    #mainWrapper {
+      height: 100%;
+      padding-top: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Обновляем стили для корректной работы с хедером Telegram */
+    #chatContainer, #profileForm {
+      padding-top: 0;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="mainWrapper">
+    <!-- Profile Form -->
+    <div id="profileForm">
+      <h3>Анонимный чат</h3>
+
+      <span class="label">Никнейм</span>
+      <input
+        type="text"
+        id="nickname"
+        placeholder="Введите никнейм"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      />
+
+      <span class="label">Пол</span>
+      <div id="genderButtons">
+        <button class="gender-btn" data-value="m">Мужской</button>
+        <button class="gender-btn" data-value="f">Женский</button>
+      </div>
+
+      <span class="label">Возраст</span>
+      <input
+        id="age"
+        type="number"
+        placeholder="Укажите возраст"
+        inputmode="numeric"
+        pattern="[0-9]*"
+      />
+
+      <span class="label">Интересы</span>
+      <div id="interestsContainer">
+        <button class="interest-btn" data-value="Общение">Общение</button>
+        <button class="interest-btn" data-value="Знакомства">Знакомства</button>
+        <button class="interest-btn" data-value="Дружба">Дружба</button>
+        <button class="interest-btn" data-value="Игры">Игры</button>
+        <button class="interest-btn" data-value="Музыка">Музыка</button>
+        <button class="interest-btn" data-value="Спорт">Спорт</button>
+      </div>
+
+      <button id="saveProfileBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Начать поиск
+      </button>
+    </div>
+
+    <!-- Chat -->
+    <div id="chatContainer">
+      <div id="partnerInfo">
+        <span id="partnerLabel">Поиск собеседника...</span>
+        <button id="skipBtn">Следующий</button>
+      </div>
+      <div id="chat">
+        <div class="system-message chat-msg">Ищем собеседника...</div>
+      </div>
+      <div id="inputArea">
+        <textarea id="messageInput" placeholder="Сообщение" rows="1"></textarea>
+        <button id="sendBtn">
+          <svg viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    const socket = io();
+
+    const mainWrapper = document.getElementById('mainWrapper');
+    const profileForm = document.getElementById('profileForm');
+    const nicknameInput = document.getElementById('nickname');
+    const genderButtons = document.querySelectorAll('.gender-btn');
+    let selectedGender = null;
+
+    const ageInput = document.getElementById('age');
+    const interestsContainer = document.getElementById('interestsContainer');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+
+    const chatContainer = document.getElementById('chatContainer');
+    const chat = document.getElementById('chat');
+    const partnerLabel = document.getElementById('partnerLabel');
+    const skipBtn = document.getElementById('skipBtn');
+
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    let partnerId = null;
+    let selectedInterests = new Set();
+
+    // Gender selection
+    genderButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        genderButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedGender = btn.dataset.value;
+      });
+    });
+
+    // Interests selection
+    interestsContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.interest-btn');
+      if (btn) {
+        const val = btn.dataset.value;
+        if (selectedInterests.has(val)) {
+          selectedInterests.delete(val);
+          btn.classList.remove('active');
+        } else {
+          selectedInterests.add(val);
+          btn.classList.add('active');
+        }
+      }
+    });
+
+    // Start button
+    saveProfileBtn.addEventListener('click', () => {
+      const nickname = nicknameInput.value.trim();
+      const gender = selectedGender;
+      const age = ageInput.value.trim();
+
+      if (!/^[A-Za-zА-Яа-я\s]{2,20}$/.test(nickname)) {
+        tg.showAlert('Никнейм должен содержать от 2 до 20 букв');
+        return;
+      }
+      if (!/^\d{1,2}$/.test(age) || age < 18 || age > 99) {
+        tg.showAlert('Укажите корректный возраст (18-99)');
+        return;
+      }
+      if (!gender) {
+        tg.showAlert('Выберите пол');
+        return;
+      }
+      if (selectedInterests.size === 0) {
+        tg.showAlert('Выберите хотя бы один интерес');
+        return;
+      }
+
+      const interestsArray = Array.from(selectedInterests);
+
+      socket.emit('setProfile', {
+        nickname,
+        gender,
+        age,
+        interests: interestsArray
+      });
+
+      profileForm.style.display = 'none';
+      chatContainer.style.display = 'flex';
+      addSystemMessage('🔎 Поиск собеседника...');
+      
+      // Показываем кнопку "назад"
+      tg.BackButton.show();
+
+      // Обновляем заголовок
+      tg.setHeaderColor(tg.colorScheme === 'dark' ? '#000000' : '#ffffff');
+    });
+
+    // Chat ready
+    socket.on('chatReady', (data) => {
+      partnerId = data.partnerId;
+      const p = data.partnerProfile;
+      const genderEmoji = p.gender === 'm' ? '👨' : '👩';
+      partnerLabel.innerHTML = `
+        <span class="online-indicator"></span>
+        ${genderEmoji} ${p.nickname}, ${p.age}
+      `;
+      addSystemMessage('✨ Собеседник найден');
+      messageInput.focus();
+    });
+
+    // Receive message
+    socket.on('receiveMessage', (msg) => {
+      addPartnerMessage(msg.text);
+    });
+
+    // Partner left
+    socket.on('partnerLeft', () => {
+      const onlineIndicator = document.querySelector('.online-indicator');
+      if (onlineIndicator) {
+        onlineIndicator.style.background = '#999';
+      }
+      addSystemMessage('Собеседник покинул чат');
+      partnerLabel.innerText = 'Поиск собеседника...';
+      partnerId = null;
+    });
+
+    // Send message
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text || !partnerId) return;
+      
+      socket.emit('sendMessage', text);
+      addMyMessage(text);
+      messageInput.value = '';
+      
+      if (window.innerWidth > 768) {
+        messageInput.focus();
+      }
+    }
+
+    // Desktop auto-focus
+    if (window.innerWidth > 768) {
+      chat.addEventListener('click', () => {
+        messageInput.focus();
+      });
+    }
+
+    // Mobile keyboard handling
+    messageInput.addEventListener('focus', () => {
+      if (window.innerWidth <= 768) {
+        setTimeout(() => {
+          chat.scrollTop = chat.scrollHeight;
+        }, 300);
+      }
+    });
+
+    // Window resize handling
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 768) {
+        chat.scrollTop = chat.scrollHeight;
+      }
+    });
+
+    // Message utilities
+    function addMyMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'my-message chat-msg';
+      div.innerText = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function addPartnerMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'partner-message chat-msg';
+      div.innerText = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function addSystemMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'system-message chat-msg';
+      div.innerHTML = `
+        <span class="system-message-text">${text}</span>
+      `;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    // Обработка клика по пустой области чата
+    chat.addEventListener('click', (e) => {
+      if (e.target === chat) {
+        messageInput.blur();
+      }
+    });
+
+    // Обновленная функция настройки мобильного ввода
+    function setupMobileInput() {
+      const inputArea = document.getElementById('inputArea');
+      const chat = document.getElementById('chat');
+      let keyboardVisible = false;
+
+      // Автоматическое изменение высоты textarea
+      function updateTextareaHeight() {
+        messageInput.style.height = 'auto';
+        messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
+      }
+
+      // Обработчик ввода текста
+      messageInput.addEventListener('input', updateTextareaHeight);
+
+      if (window.visualViewport) {
+        let lastVisualViewportHeight = window.visualViewport.height;
+
+        window.visualViewport.addEventListener('resize', () => {
+          const currentHeight = window.visualViewport.height;
+          const heightDiff = window.innerHeight - currentHeight;
+          
+          if (heightDiff > 150) { // Клавиатура открыта
+            keyboardVisible = true;
+            inputArea.style.position = 'absolute';
+            inputArea.style.bottom = `${heightDiff}px`;
+            
+            // Прокручиваем чат к последнему сообщению
+            requestAnimationFrame(() => {
+              chat.scrollTop = chat.scrollHeight;
+            });
+          } else {
+            keyboardVisible = false;
+            inputArea.style.position = 'fixed';
+            inputArea.style.bottom = '0';
+          }
+
+          lastVisualViewportHeight = currentHeight;
+        });
+
+        window.visualViewport.addEventListener('scroll', () => {
+          if (keyboardVisible) {
+            inputArea.style.bottom = `${window.visualViewport.offsetTop}px`;
+          }
+        });
+      }
+
+      // Обработка Enter для отправки (Shift+Enter для новой строки)
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          if (messageInput.value.trim()) {
+            handleSend();
+          }
+        }
+      });
+
+      // Обработчик отправки
+      function handleSend() {
+        const text = messageInput.value.trim();
+        if (!text || !partnerId) return;
+        
+        socket.emit('sendMessage', text);
+        addMyMessage(text);
+        
+        messageInput.value = '';
+        messageInput.style.height = '36px'; // Сброс высоты
+        
+        // Сохраняем фокус после отправки
+        if (keyboardVisible) {
+          messageInput.focus();
+        }
+      }
+
+      // Обработка клика по чату
+      chat.addEventListener('click', (e) => {
+        if (e.target === chat) {
+          messageInput.blur();
+        }
+      });
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', setupMobileInput);
+
+    // Обработка изменения размера окна
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 768) {
+        chat.scrollTop = chat.scrollHeight;
+      }
+    });
+
+    // Добавляем обработку кнопки "назад"
+    tg.BackButton.show();
+    
+    // Обработка нажатия кнопки "назад"
+    tg.BackButton.onClick(() => {
+      if (chatContainer.style.display === 'flex') {
+        // Если мы в чате, возвращаемся к профилю
+        chatContainer.style.display = 'none';
+        profileForm.style.display = 'block';
+        
+        // Отключаемся от текущего чата
+        if (partnerId) {
+          socket.emit('leaveChat');
+          partnerId = null;
+        }
+        
+        // Очищаем чат
+        chat.innerHTML = '';
+        
+        // Сбрасываем поле ввода
+        messageInput.value = '';
+
+        // Скрываем кнопку "назад" на главном экране
+        tg.BackButton.hide();
+      } else {
+        // Если мы в профиле, спрашиваем о закрытии
+        if (confirm('Вы действительно хотите выйти?')) {
+          tg.close();
+        }
+      }
+    });
+
+    // Форматирование времени
+    function formatTime(date) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Улучшенная функция добавления сообщения
+    function addMessage(text, isOwn) {
+      const div = document.createElement('div');
+      div.className = isOwn ? 'my-message chat-msg' : 'partner-message chat-msg';
+      
+      // Основной текст
+      const messageText = document.createElement('div');
+      messageText.className = 'message-text';
+      
+      // Форматируем ссылки и эмодзи
+      const formattedText = text
+        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: inherit; text-decoration: underline;">$1</a>')
+        .replace(/\n/g, '<br>');
+        
+      messageText.innerHTML = formattedText;
+      div.appendChild(messageText);
+      
+      // Добавляем время
+      const timeDiv = document.createElement('div');
+      timeDiv.className = 'message-time';
+      timeDiv.textContent = formatTime(new Date());
+      div.appendChild(timeDiv);
+      
+      chat.appendChild(div);
+      
+      // Автоматическая прокрутка только если мы близко к концу
+      if (chat.scrollHeight - chat.scrollTop - chat.clientHeight < 150) {
+        chat.scrollTop = chat.scrollHeight;
+      }
+    }
+
+    // Обработка длинных сообщений
+    messageInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      const newHeight = Math.min(this.scrollHeight, 100);
+      this.style.height = newHeight + 'px';
+      
+      // Обновляем отступ чата
+      chat.style.paddingBottom = (newHeight + 20) + 'px';
+    });
+
+    // Инициализация Telegram Mini App
+    document.addEventListener('DOMContentLoaded', () => {
+      // Сообщаем что приложение готово
+      tg.ready();
+      
+      // Разворачиваем на весь экран
+      tg.expand();
+      
+      // Устанавливаем цвет хедера в соответствии с темой
+      tg.setHeaderColor(tg.colorScheme === 'dark' ? '#000000' : '#ffffff');
+      
+      // Включаем подтверждение закрытия
+      tg.enableClosingConfirmation();
+
+      // Настраиваем кнопку "назад"
+      tg.BackButton.onClick(() => {
+        if (chatContainer.style.display === 'flex') {
+          // Если мы в чате, возвращаемся к профилю
+          chatContainer.style.display = 'none';
+          profileForm.style.display = 'block';
+          
+          if (partnerId) {
+            socket.emit('leaveChat');
+            partnerId = null;
+          }
+          
+          chat.innerHTML = '';
+          messageInput.value = '';
+          
+          // Скрываем кнопку "назад" на главном экране
+          tg.BackButton.hide();
+        } else {
+          // Если мы в профиле, спрашиваем о закрытии
+          if (confirm('Вы действительно хотите выйти?')) {
+            tg.close();
+          }
+        }
+      });
+
+      // Обработка темной темы
+      const isDarkTheme = tg.colorScheme === 'dark';
+      if (isDarkTheme) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+
+      // Настраиваем хэппи-пас эффект (плавное появление)
+      tg.onEvent('viewportChanged', () => {
+        if (window.innerHeight === tg.viewportHeight) {
+          document.body.classList.add('app-ready');
+        }
+      });
+
+      // Инициализируем остальные функции
+      setupMobileInput();
+    });
+
+    // Добавляем обработку системной темы
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      const isDark = e.matches;
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      tg.setHeaderColor(isDark ? '#000000' : '#ffffff');
+    });
+
+    function setupInputArea() {
+      const inputArea = document.getElementById('inputArea');
+      const messageInput = document.getElementById('messageInput');
+      const chat = document.getElementById('chat');
+      
+      // Функция для обновления высоты текстового поля
+      function updateTextareaHeight() {
+        messageInput.style.height = '36px';
+        messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
+      }
+
+      // Обработчик изменения размера viewport (для iOS)
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+          const currentHeight = window.visualViewport.height;
+          const offset = window.innerHeight - currentHeight;
+          
+          if (offset > 0) {
+            // Клавиатура открыта
+            inputArea.style.position = 'absolute';
+            inputArea.style.bottom = offset + 'px';
+            
+            // Прокручиваем чат к последнему сообщению
+            setTimeout(() => {
+              chat.scrollTop = chat.scrollHeight;
+            }, 100);
+          } else {
+            // Клавиатура закрыта
+            inputArea.style.position = 'fixed';
+            inputArea.style.bottom = '0';
+          }
+        });
+
+        window.visualViewport.addEventListener('scroll', () => {
+          if (window.visualViewport.height < window.innerHeight) {
+            inputArea.style.bottom = window.visualViewport.offsetTop + 'px';
+          }
+        });
+      }
+
+      // Обработчики для текстового поля
+      messageInput.addEventListener('input', updateTextareaHeight);
+      
+      messageInput.addEventListener('focus', () => {
+        setTimeout(() => {
+          chat.scrollTop = chat.scrollHeight;
+        }, 100);
+      });
+
+      // Обработчик клика по чату для скрытия клавиатуры
+      chat.addEventListener('click', (e) => {
+        if (e.target === chat) {
+          messageInput.blur();
+        }
+      });
+
+      // Обработка Enter для отправки
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          if (messageInput.value.trim()) {
+            handleSend();
+          }
+        }
+      });
+    }
+
+    // Инициализация после загрузки страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      setupInputArea();
+      
+      // Инициализация Telegram WebApp
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+    });
+  </script>
+</body>
+</html>
