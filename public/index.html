@@ -1474,6 +1474,38 @@ const messageInput = document.getElementById('messageInput');
         });
       }
     });
+    function setupIOSFixes() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+               
+  if (isIOS) {
+    const inputArea = document.getElementById('inputArea');
+    const messageInput = document.getElementById('messageInput');
+    
+    // Добавляем слой фикса для iOS
+    const fixLayer = document.createElement('div');
+    fixLayer.id = 'ios-keyboard-fix-layer';
+    fixLayer.style.position = 'absolute';
+    fixLayer.style.top = '0';
+    fixLayer.style.left = '0';
+    fixLayer.style.width = '100%';
+    fixLayer.style.height = '100%';
+    fixLayer.style.pointerEvents = 'none';
+    fixLayer.style.zIndex = '-1';
+    document.body.appendChild(fixLayer);
+    
+    // Специфичный хак для iOS
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        if (messageInput === document.activeElement) {
+          messageInput.blur();
+          setTimeout(() => messageInput.focus(), 100);
+        }
+      }, 200);
+    });
+  }
+}
 
     // Инициализация
     document.addEventListener('DOMContentLoaded', () => {
